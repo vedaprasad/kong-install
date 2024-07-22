@@ -1,0 +1,44 @@
+# Basic configuration for Kong without the ingress controller, using the Postgres subchart
+# This installation does not create an Ingress or LoadBalancer Service for
+# the Admin API. It requires port-forwards to access without further
+# configuration to add them, e.g.:
+# kubectl port-forward deploy/your-deployment-kong 8001:8001
+
+image:
+  repository: ${repo}
+  tag: "3.6"
+
+env:
+  database: "postgres"
+
+admin:
+  enabled: true
+  type: ClusterIP
+  http:
+    enabled: true
+    servicePort: 8001
+    containerPort: 8001
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    tls: true
+    hostname: kong-admin.ved-tech.net
+    annotations:
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    path: /
+    pathType: ImplementationSpecific
+
+proxy:
+  # Enable creating a Kubernetes service for the proxy
+  enabled: true
+  type: ClusterIP
+
+postgresql:
+  enabled: true
+  auth:
+    username: kong
+    database: kong
+    password: kong
+
+ingressController:
+  enabled: false
